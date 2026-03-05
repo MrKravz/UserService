@@ -47,7 +47,7 @@ public class PaymentCard {
     private LocalDateTime updatedAt;
 
 
-    @ManyToOne(cascade = CascadeType.REFRESH)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "user_id",
             referencedColumnName = "id"
