@@ -4,9 +4,9 @@ public interface CrudService<REQUEST, RESPONSE, ID> {
 
     RESPONSE findById(ID id);
 
-    RESPONSE save(REQUEST request);
+    ID save(REQUEST request);
 
-    RESPONSE update(REQUEST request, ID id);
+    ID update(REQUEST request, ID id);
 
     void deleteById(ID id);
 

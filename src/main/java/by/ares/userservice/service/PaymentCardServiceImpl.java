@@ -4,7 +4,6 @@ import by.ares.userservice.dto.request.PaymentCardRequest;
 import by.ares.userservice.dto.response.PaymentCardDto;
 import by.ares.userservice.mapper.PaymentCardMapper;
 import by.ares.userservice.model.ActivationStatus;
-import by.ares.userservice.model.PaymentCard;
 import by.ares.userservice.repository.PaymentCardRepository;
 import by.ares.userservice.service.abstraction.PaymentCardService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +28,9 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     private final PaymentCardMapper paymentCardMapper;
 
     @Override
-    public Page<PaymentCardDto> findAll(Specification<PaymentCard> specification, Pageable pageable) {
-        return paymentCardRepository.findAll(specification, pageable).map(paymentCardMapper::toDto);
+    public Page<PaymentCardDto> findAll(Pageable pageable) {
+        return paymentCardRepository.findAll(pageable)
+                .map(paymentCardMapper::toDto);
     }
 
     @Override
@@ -50,20 +49,20 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
     @Override
     @Transactional
-    @CachePut(value = "cards", key = "'card:' + #result.id")
-    public PaymentCardDto save(PaymentCardRequest paymentCardRequest) {
-        return paymentCardMapper.toDto(paymentCardRepository.save(paymentCardMapper.toModel(paymentCardRequest)));
+    @CachePut(value = "cards", key = "'card:' + #result")
+    public Long save(PaymentCardRequest paymentCardRequest) {
+        return paymentCardRepository.save(paymentCardMapper.toModel(paymentCardRequest)).getId();
     }
 
     @Override
     @Transactional
     @CachePut(value = "cards", key = "'card:' + #id")
-    public PaymentCardDto update(PaymentCardRequest paymentCardRequest, Long id) {
+    public Long update(PaymentCardRequest paymentCardRequest, Long id) {
         var paymentCard = paymentCardRepository.findById(id).orElseThrow();
         paymentCard.setNumber(paymentCardRequest.getNumber())
                 .setHolder(paymentCardRequest.getHolder())
                 .setExpirationDate(paymentCardRequest.getExpirationDate());
-        return paymentCardMapper.toDto(paymentCardRepository.save(paymentCard));
+        return paymentCardRepository.save(paymentCard).getId();
     }
 
     @Override

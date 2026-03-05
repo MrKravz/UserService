@@ -1,11 +1,13 @@
 package by.ares.userservice.service;
 
+import by.ares.userservice.dto.request.SpecificationRequest;
 import by.ares.userservice.dto.request.UserRequest;
 import by.ares.userservice.dto.response.UserDto;
 import by.ares.userservice.mapper.UserMapper;
 import by.ares.userservice.model.ActivationStatus;
 import by.ares.userservice.model.User;
 import by.ares.userservice.repository.UserRepository;
+import by.ares.userservice.service.abstraction.SpecificationBuilderService;
 import by.ares.userservice.service.abstraction.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -13,7 +15,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final SpecificationBuilderService<User> specificationBuilderService;
     private final UserMapper userMapper;
 
     @Override
-    public Page<UserDto> findAll(Specification<User> specification, Pageable pageable) {
-        return userRepository.findAll(specification, pageable).map(userMapper::toDto);
+    public Page<UserDto> findAll(SpecificationRequest specificationRequest, Pageable pageable) {
+        return userRepository.findAll(specificationBuilderService.configure(specificationRequest), pageable)
+                .map(userMapper::toDto);
     }
 
     @Override
@@ -39,21 +42,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    @CachePut(value = "users", key = "'user:' + #result.id")
-    public UserDto save(UserRequest userRequest) {
-        return userMapper.toDto(userRepository.save(userMapper.toModel(userRequest)));
+    @CachePut(value = "users", key = "'user:' + #result")
+    public Long save(UserRequest userRequest) {
+        return userRepository.save(userMapper.toModel(userRequest)).getId();
     }
 
     @Override
     @Transactional
     @CachePut(value = "users", key = "'user:' + #id")
-    public UserDto update(UserRequest userRequest, Long id) {
+    public Long update(UserRequest userRequest, Long id) {
         var user = userRepository.findById(id).orElseThrow();
         user.setName(userRequest.getName())
                 .setSurname(userRequest.getSurname())
                 .setBirthDate(userRequest.getBirthDate())
                 .setEmail(userRequest.getEmail());
-        return userMapper.toDto(userRepository.save(user));
+        return userRepository.save(user).getId();
     }
 
     @Override
