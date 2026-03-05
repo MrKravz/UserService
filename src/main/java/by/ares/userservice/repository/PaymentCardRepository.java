@@ -13,5 +13,4 @@ public interface PaymentCardRepository extends JpaRepository<PaymentCard, Long>,
 
     Set<PaymentCard> findAllByUserId(Long userId);
 
-
 }
