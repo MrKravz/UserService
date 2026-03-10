@@ -1,9 +1,9 @@
 package by.ares.userservice.service.abstraction;
 
-import by.ares.userservice.model.ActivationStatus;
+import by.ares.userservice.dto.request.ActivationStatusRequest;
 
 public interface StatusChangerService<ID> {
 
-    ID changeStatus(ID id, ActivationStatus activationStatus);
+    ID changeStatus(ID id, ActivationStatusRequest activationStatusRequest);
 
 }

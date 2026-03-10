@@ -1,5 +1,6 @@
 package by.ares.userservice.dto.request;
 
+import by.ares.userservice.model.ActivationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +12,8 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class SpecificationRequest {
-    private String name;
-    private String surname;
+public class ActivationStatusRequest {
+
+    private ActivationStatus activationStatus;
+
 }

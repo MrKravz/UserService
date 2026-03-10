@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -18,10 +19,11 @@ import java.util.Set;
 @Setter
 @Accessors(chain = true)
 @Table(name = "users")
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name")
@@ -39,7 +41,7 @@ public class User {
 
     @Column(name = "active")
     @Enumerated(EnumType.STRING)
-    private ActivationStatus active;
+    private ActivationStatus active = ActivationStatus.ACTIVE;
 
     @Column(name = "created_at")
     @CreatedDate
@@ -54,5 +56,15 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,
             fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<PaymentCard> paymentCards = new HashSet<>();
+
+    public void addCard(PaymentCard paymentCard) {
+        paymentCards.add(paymentCard);
+        paymentCard.setUser(this);
+    }
+
+    public void removeCard(PaymentCard paymentCard) {
+        paymentCards.remove(paymentCard);
+        paymentCard.setUser(null);
+    }
 
 }

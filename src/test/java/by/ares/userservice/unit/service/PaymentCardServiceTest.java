@@ -1,10 +1,15 @@
-package by.ares.userservice.service;
+package by.ares.userservice.unit.service;
 
+import by.ares.userservice.dto.request.ActivationStatusRequest;
 import by.ares.userservice.dto.request.PaymentCardRequest;
 import by.ares.userservice.dto.response.PaymentCardDto;
 import by.ares.userservice.mapper.PaymentCardMapper;
+import by.ares.userservice.model.ActivationStatus;
 import by.ares.userservice.model.PaymentCard;
+import by.ares.userservice.model.User;
 import by.ares.userservice.repository.PaymentCardRepository;
+import by.ares.userservice.repository.UserRepository;
+import by.ares.userservice.service.PaymentCardServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static by.ares.userservice.util.TestConstants.*;
+import static by.ares.userservice.util.TestModelBuilder.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +32,8 @@ public class PaymentCardServiceTest {
     @Mock
     private PaymentCardRepository paymentCardRepository;
     @Mock
+    private UserRepository userRepository;
+    @Mock
     private PaymentCardMapper paymentCardMapper;
     @InjectMocks
     private PaymentCardServiceImpl paymentCardService;
@@ -33,23 +41,21 @@ public class PaymentCardServiceTest {
     private PaymentCard card;
     private PaymentCardDto cardDto;
     private PaymentCardRequest request;
+    private User user;
+
 
     @BeforeEach
-    void setUp() {
-        card = new PaymentCard()
+    void init() {
+        user = buildUser()
+                .setId(USER_ID);
+        card = buildPaymentCard(user)
                 .setId(CARD_ID)
-                .setNumber(CARD_NUMBER)
-                .setHolder(CARD_HOLDER)
-                .setExpirationDate(EXPIRATION_DATE);
-        cardDto = PaymentCardDto.builder()
-                .id(CARD_ID)
-                .build();
-        request = PaymentCardRequest.builder()
-                .number(CARD_NUMBER)
-                .holder(CARD_HOLDER)
-                .expirationDate(EXPIRATION_DATE)
-                .build();
+                .setNumber(CARD_NUMBER);
+        cardDto = buildPaymentCardDto();
+        request = buildPaymentCardRequest(CARD_NUMBER, USER_ID);
+        user.addCard(card);
     }
+
 
     @Test
     void findById_shouldReturnCard() {
@@ -63,10 +69,10 @@ public class PaymentCardServiceTest {
     @Test
     void save_shouldSaveCard() {
         when(paymentCardMapper.toModel(request)).thenReturn(card);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
         when(paymentCardRepository.save(card)).thenReturn(card);
-        when(paymentCardMapper.toDto(card)).thenReturn(cardDto);
         var result = paymentCardService.save(request);
-        assertEquals(CARD_ID, result.getId());
+        assertEquals(CARD_ID, result);
         verify(paymentCardRepository).save(card);
     }
 
@@ -74,15 +80,16 @@ public class PaymentCardServiceTest {
     void update_shouldUpdateCard() {
         when(paymentCardRepository.findById(CARD_ID)).thenReturn(Optional.of(card));
         when(paymentCardRepository.save(card)).thenReturn(card);
-        when(paymentCardMapper.toDto(card)).thenReturn(cardDto);
         var result = paymentCardService.update(request, CARD_ID);
-        assertEquals(CARD_ID, result.getId());
+        assertEquals(CARD_ID, result);
         verify(paymentCardRepository).save(card);
     }
 
     @Test
     void deleteById_shouldDeleteCard() {
+        when(paymentCardRepository.findById(CARD_ID)).thenReturn(Optional.of(card));
         paymentCardService.deleteById(CARD_ID);
+        verify(paymentCardRepository).findById(CARD_ID);
         verify(paymentCardRepository).deleteById(CARD_ID);
     }
 
@@ -99,7 +106,7 @@ public class PaymentCardServiceTest {
     void changeStatus_shouldUpdateStatus() {
         when(paymentCardRepository.findById(CARD_ID)).thenReturn(Optional.of(card));
         when(paymentCardRepository.save(card)).thenReturn(card);
-        Long result = paymentCardService.changeStatus(CARD_ID, ACTIVE);
+        Long result = paymentCardService.changeStatus(CARD_ID, new ActivationStatusRequest(ActivationStatus.INACTIVE));
         assertEquals(CARD_ID, result);
         verify(paymentCardRepository).save(card);
     }

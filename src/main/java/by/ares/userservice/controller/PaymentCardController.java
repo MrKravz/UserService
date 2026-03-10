@@ -1,9 +1,10 @@
 package by.ares.userservice.controller;
 
+import by.ares.userservice.dto.request.ActivationStatusRequest;
 import by.ares.userservice.dto.request.PaymentCardRequest;
 import by.ares.userservice.dto.response.PaymentCardDto;
-import by.ares.userservice.model.ActivationStatus;
 import by.ares.userservice.service.abstraction.PaymentCardService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,18 +31,18 @@ public class PaymentCardController {
     }
 
     @PostMapping
-    public ResponseEntity<Long> save(@RequestBody PaymentCardRequest paymentCardRequest) {
+    public ResponseEntity<Long> save(@Valid @RequestBody PaymentCardRequest paymentCardRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentCardService.save(paymentCardRequest));
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Long> update(@RequestBody PaymentCardRequest paymentCardRequest, @PathVariable Long id) {
+    public ResponseEntity<Long> update(@Valid @RequestBody PaymentCardRequest paymentCardRequest, @PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(paymentCardService.update(paymentCardRequest, id));
     }
 
     @PutMapping("/change_status/{id}")
-    public ResponseEntity<Long> changeStatus(@RequestBody ActivationStatus activationStatus, @PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(paymentCardService.changeStatus(id, activationStatus));
+    public ResponseEntity<Long> changeStatus(@RequestBody ActivationStatusRequest activationStatusRequest, @PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(paymentCardService.changeStatus(id, activationStatusRequest));
     }
 
     @DeleteMapping("{id}")
