@@ -28,14 +28,14 @@ public abstract class AbstractIntegrationTest {
 
 
     @Container
-    final static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15")
+    static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15")
             .withDatabaseName("test_db")
             .withUsername("test")
             .withPassword("test")
             .withReuse(true);
 
     @Container
-    final static RedisContainer redis = new RedisContainer("redis:7")
+    static final RedisContainer redis = new RedisContainer("redis:7")
             .withExposedPorts(6379)
             .withReuse(true);
 

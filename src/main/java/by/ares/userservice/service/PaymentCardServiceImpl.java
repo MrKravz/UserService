@@ -31,6 +31,8 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     private final UserRepository userRepository;
     private final PaymentCardMapper paymentCardMapper;
 
+    private final String exceptionMessage = "Payment with this id not found";
+
     @Override
     public Page<PaymentCardDto> findAll(Pageable pageable) {
         return paymentCardRepository.findAll(pageable)
@@ -49,7 +51,7 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     @Cacheable(value = "cards", key = "'card:' + #id", sync = true)
     public PaymentCardDto findById(Long id) {
         return paymentCardMapper.toDto(paymentCardRepository.findById(id)
-                .orElseThrow(() -> new PaymentCardNotFoundException("Payment with id: " + id + " not found")));
+                .orElseThrow(() -> new PaymentCardNotFoundException(exceptionMessage)));
     }
 
     @Override
@@ -67,10 +69,10 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "users", key = "'user:' + #id")
+    @CacheEvict(value = "cards", key = "'card:' + #id")
     public Long update(PaymentCardRequest paymentCardRequest, Long id) {
         var paymentCard = paymentCardRepository.findById(id)
-                .orElseThrow(() -> new PaymentCardNotFoundException("Payment with id: " + id + " not found"));
+                .orElseThrow(() -> new PaymentCardNotFoundException(exceptionMessage));
         paymentCard.setNumber(paymentCardRequest.getNumber())
                 .setExpirationDate(paymentCardRequest.getExpirationDate());
         return paymentCardRepository.save(paymentCard).getId();
@@ -78,20 +80,20 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "users", key = "'user:' + #id")
+    @CacheEvict(value = "cards", key = "'card:' + #id")
     public void deleteById(Long id) {
         var paymentCard = paymentCardRepository.findById(id)
-                .orElseThrow(() -> new PaymentCardNotFoundException("Payment with id: " + id + " not found"));
+                .orElseThrow(() -> new PaymentCardNotFoundException(exceptionMessage));
         paymentCard.getUser().removeCard(paymentCard);
         paymentCardRepository.deleteById(id);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "users", key = "'user:' + #id")
+    @CacheEvict(value = "cards", key = "'card:' + #id")
     public Long changeStatus(Long id, ActivationStatusRequest activationStatusRequest) {
         var user = paymentCardRepository.findById(id)
-                .orElseThrow(() -> new PaymentCardNotFoundException("Payment with id: " + id + " not found"));
+                .orElseThrow(() -> new PaymentCardNotFoundException(exceptionMessage));
         user.setActive(activationStatusRequest.getActivationStatus());
         return paymentCardRepository.save(user).getId();
     }

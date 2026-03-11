@@ -1,6 +1,6 @@
 package by.ares.userservice.mapper;
 
-public interface SimpleMapper<REQUEST, DTO, MODEL> {
-    MODEL toModel(REQUEST request);
-    DTO toDto(MODEL model);
+public interface SimpleMapper<R, D, T> {
+    T toModel(R request);
+    D toDto(T model);
 }

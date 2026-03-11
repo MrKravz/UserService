@@ -106,8 +106,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturnPage() throws Exception {
-        final PaymentCard paymentCard1 = savePaymentCard(user);
-        final PaymentCard paymentCard2 = savePaymentCard(user);
+        savePaymentCard(user);
+        savePaymentCard(user);
         mockMvc.perform(get("/payment_cards?page=0&size=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2));

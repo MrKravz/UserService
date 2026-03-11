@@ -1,13 +1,13 @@
 package by.ares.userservice.service.abstraction;
 
-public interface CrudService<REQUEST, RESPONSE, ID> {
+public interface CrudService<R, D, T> {
 
-    RESPONSE findById(ID id);
+    D findById(T id);
 
-    ID save(REQUEST request);
+    T save(R request);
 
-    ID update(REQUEST request, ID id);
+    T update(R request, T id);
 
-    void deleteById(ID id);
+    void deleteById(T id);
 
 }

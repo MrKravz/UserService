@@ -31,6 +31,8 @@ public class UserServiceImpl implements UserService {
     private final SpecificationBuilderService<User> specificationBuilderService;
     private final UserMapper userMapper;
 
+    private final String exceptionMessage = "User with this id not found";
+
     @Override
     public Page<UserDto> findAll(SpecificationRequest specificationRequest, Pageable pageable) {
         return specificationRequest == null ? userRepository.findAll(pageable).map(userMapper::toDto) :
@@ -42,7 +44,7 @@ public class UserServiceImpl implements UserService {
     @Cacheable(value = "users", key = "'user:' + #id", sync = true)
     public UserDto findById(Long id) {
         return userMapper.toDto(userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User with id: " + id + " not found")));
+                .orElseThrow(() -> new UserNotFoundException(exceptionMessage)));
     }
 
     @Override
@@ -59,7 +61,7 @@ public class UserServiceImpl implements UserService {
     @CacheEvict(value = "users", key = "'user:' + #id")
     public Long update(UserRequest userRequest, Long id) {
         var user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User with id: " + id + " not found"));
+                .orElseThrow(() -> new UserNotFoundException(exceptionMessage));
         if (!userRequest.getName().equals(user.getName()) || !userRequest.getSurname().equals(user.getSurname())) {
             for (var card : user.getPaymentCards()) {
                 card.setHolder(userRequest.getName().toUpperCase() + " " + userRequest.getSurname().toUpperCase());
@@ -84,7 +86,7 @@ public class UserServiceImpl implements UserService {
     @CacheEvict(value = "users", key = "'user:' + #id")
     public Long changeStatus(Long id, ActivationStatusRequest activationStatusRequest) {
         var user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User with id: " + id + " not found"));
+                .orElseThrow(() -> new UserNotFoundException(exceptionMessage));
         user.setActive(activationStatusRequest.getActivationStatus());
         return userRepository.save(user).getId();
     }
