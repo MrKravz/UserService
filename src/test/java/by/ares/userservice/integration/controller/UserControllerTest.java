@@ -77,8 +77,7 @@ class UserControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isAccepted())
                 .andExpect(content().string(String.valueOf(user.getId())));
         mockMvc.perform(get("/users/{id}", user.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.active").value(String.valueOf(INACTIVE)));
+                .andExpect(status().isBadRequest());
     }
 
     @Test

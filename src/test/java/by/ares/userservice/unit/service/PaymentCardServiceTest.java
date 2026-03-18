@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 
 import java.util.Optional;
 import java.util.Set;
@@ -23,8 +25,8 @@ import java.util.Set;
 import static by.ares.userservice.util.TestConstants.*;
 import static by.ares.userservice.util.TestModelBuilder.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentCardServiceTest {
@@ -35,6 +37,10 @@ class PaymentCardServiceTest {
     private UserRepository userRepository;
     @Mock
     private PaymentCardMapper paymentCardMapper;
+    @Mock
+    private CacheManager cacheManager;
+    @Mock
+    private Cache cache;
     @InjectMocks
     private PaymentCardServiceImpl paymentCardService;
 
@@ -54,6 +60,7 @@ class PaymentCardServiceTest {
         cardDto = buildPaymentCardDto();
         request = buildPaymentCardRequest(CARD_NUMBER, USER_ID);
         user.addCard(card);
+        lenient().when(cacheManager.getCache(anyString())).thenReturn(cache);
     }
 
 
@@ -90,7 +97,7 @@ class PaymentCardServiceTest {
         when(paymentCardRepository.findById(CARD_ID)).thenReturn(Optional.of(card));
         paymentCardService.deleteById(CARD_ID);
         verify(paymentCardRepository).findById(CARD_ID);
-        verify(paymentCardRepository).deleteById(CARD_ID);
+        verify(paymentCardRepository).save(card);
     }
 
     @Test

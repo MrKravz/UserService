@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,6 +20,7 @@ import java.util.Set;
 @Setter
 @Accessors(chain = true)
 @Table(name = "users")
+@SQLRestriction("active = 'ACTIVE'")
 @EntityListeners(AuditingEntityListener.class)
 public class User {
 
@@ -53,8 +55,12 @@ public class User {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime updatedAt;
 
+    @Version
+    @Column(name = "version")
+    private Long version = 0L;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY, orphanRemoval = true)
+            fetch = FetchType.LAZY)
     private Set<PaymentCard> paymentCards = new HashSet<>();
 
     public void addCard(PaymentCard paymentCard) {
@@ -65,6 +71,11 @@ public class User {
     public void removeCard(PaymentCard paymentCard) {
         paymentCards.remove(paymentCard);
         paymentCard.setUser(null);
+    }
+
+    public void clear() {
+        paymentCards.forEach(x->x.setUser(null));
+        paymentCards.clear();
     }
 
 }

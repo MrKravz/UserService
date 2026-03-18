@@ -13,14 +13,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 
 import java.util.Optional;
 
 import static by.ares.userservice.util.TestConstants.*;
 import static by.ares.userservice.util.TestModelBuilder.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -29,6 +31,10 @@ class UserServiceTest {
     private UserRepository userRepository;
     @Mock
     private UserMapper userMapper;
+    @Mock
+    private CacheManager cacheManager;
+    @Mock
+    private Cache cache;
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -43,6 +49,7 @@ class UserServiceTest {
                 .setId(USER_ID);
         userDto = buildUserDto();
         userRequest = buildUserRequest(USER_EMAIL);
+        lenient().when(cacheManager.getCache(anyString())).thenReturn(cache);
     }
 
 
@@ -75,8 +82,10 @@ class UserServiceTest {
 
     @Test
     void deleteById_shouldDeleteUser() {
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
         userService.deleteById(USER_ID);
-        verify(userRepository).deleteById(USER_ID);
+        verify(userRepository).findById(USER_ID);
+        verify(userRepository).save(user);
     }
 
     @Test

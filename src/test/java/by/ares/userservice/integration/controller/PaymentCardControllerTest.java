@@ -94,8 +94,7 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isAccepted())
                 .andExpect(content().string(String.valueOf(paymentCard.getId())));
         mockMvc.perform(get("/payment_cards/{id}", paymentCard.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.active").value(String.valueOf(INACTIVE)));
+                .andExpect(status().isBadRequest());
     }
 
     @Test

@@ -7,14 +7,20 @@ import by.ares.userservice.exception.PaymentCardNotFoundException;
 import by.ares.userservice.exception.UserCardLimitExceededException;
 import by.ares.userservice.exception.UserNotFoundException;
 import by.ares.userservice.mapper.PaymentCardMapper;
+import by.ares.userservice.model.ActivationStatus;
+import by.ares.userservice.model.PaymentCard;
+import by.ares.userservice.model.User;
 import by.ares.userservice.repository.PaymentCardRepository;
 import by.ares.userservice.repository.UserRepository;
 import by.ares.userservice.service.abstraction.PaymentCardService;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,13 +36,14 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     private final PaymentCardRepository paymentCardRepository;
     private final UserRepository userRepository;
     private final PaymentCardMapper paymentCardMapper;
+    private final CacheManager cacheManager;
 
     private final String exceptionMessage = "Payment with this id not found";
+    private final ActivationStatus deletedActivationStatus = ActivationStatus.INACTIVE;
 
     @Override
     public Page<PaymentCardDto> findAll(Pageable pageable) {
-        return paymentCardRepository.findAll(pageable)
-                .map(paymentCardMapper::toDto);
+        return paymentCardRepository.findAll(pageable).map(paymentCardMapper::toDto);
     }
 
     @Override
@@ -56,46 +63,57 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = OptimisticLockException.class,
+            backoff = @Backoff(delay = 100)
+    )
     public Long save(PaymentCardRequest paymentCardRequest) {
-        var owner = userRepository.findById(paymentCardRequest.getUserId())
+        User owner = userRepository.findById(paymentCardRequest.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User with id: " + paymentCardRequest.getUserId() + " not found"));
-        if (owner.getPaymentCards().size() >= 5) { throw new UserCardLimitExceededException("User can't have more than 5 cards"); }
-        var card = paymentCardMapper.toModel(paymentCardRequest);
+        if (owner.getPaymentCards().size() >= 5) {
+            throw new UserCardLimitExceededException("User can't have more than 5 cards");
+        }
+        PaymentCard card = paymentCardMapper.toModel(paymentCardRequest);
         card.setUser(owner);
         owner.addCard(card);
         card.setHolder(owner.getName().toUpperCase() + " " + owner.getSurname().toUpperCase());
+        cacheManager.getCache("users").evict("user:" + owner.getId());
         return paymentCardRepository.save(card).getId();
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "cards", key = "'card:' + #id")
     public Long update(PaymentCardRequest paymentCardRequest, Long id) {
-        var paymentCard = paymentCardRepository.findById(id)
+        PaymentCard paymentCard = paymentCardRepository.findById(id)
                 .orElseThrow(() -> new PaymentCardNotFoundException(exceptionMessage));
         paymentCard.setNumber(paymentCardRequest.getNumber())
                 .setExpirationDate(paymentCardRequest.getExpirationDate());
+        cacheManager.getCache("cards").evict("card:" + paymentCard.getId());
+        cacheManager.getCache("users").evict("user:" + paymentCard.getUser().getId());
         return paymentCardRepository.save(paymentCard).getId();
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "cards", key = "'card:' + #id")
     public void deleteById(Long id) {
-        var paymentCard = paymentCardRepository.findById(id)
+        PaymentCard paymentCard = paymentCardRepository.findById(id)
                 .orElseThrow(() -> new PaymentCardNotFoundException(exceptionMessage));
+        paymentCard.setActive(deletedActivationStatus);
+        cacheManager.getCache("cards").evict("card:" + paymentCard.getId());
+        cacheManager.getCache("users").evict("user:" + paymentCard.getUser().getId());
         paymentCard.getUser().removeCard(paymentCard);
-        paymentCardRepository.deleteById(id);
+        paymentCardRepository.save(paymentCard);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "cards", key = "'card:' + #id")
     public Long changeStatus(Long id, ActivationStatusRequest activationStatusRequest) {
-        var user = paymentCardRepository.findById(id)
+        PaymentCard paymentCard = paymentCardRepository.findById(id)
                 .orElseThrow(() -> new PaymentCardNotFoundException(exceptionMessage));
-        user.setActive(activationStatusRequest.getActivationStatus());
-        return paymentCardRepository.save(user).getId();
+        paymentCard.setActive(activationStatusRequest.getActivationStatus());
+        cacheManager.getCache("cards").evict("card:" + paymentCard.getId());
+        cacheManager.getCache("users").evict("user:" + paymentCard.getUser().getId());
+        return paymentCardRepository.save(paymentCard).getId();
     }
 
 }

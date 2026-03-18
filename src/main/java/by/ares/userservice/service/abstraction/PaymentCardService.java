@@ -7,9 +7,11 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Set;
 
-public interface PaymentCardService extends CrudService<PaymentCardRequest, PaymentCardDto, Long>, StatusChangerService<Long> {
-
+public interface PaymentCardService extends StatusChangerService<Long> {
     Page<PaymentCardDto> findAll(Pageable pageable);
     Set<PaymentCardDto> findAllCardsOfUser(Long userId);
-
+    PaymentCardDto findById(Long id);
+    Long save(PaymentCardRequest paymentCardRequest);
+    Long update(PaymentCardRequest paymentCardRequest, Long id);
+    void deleteById(Long id);
 }

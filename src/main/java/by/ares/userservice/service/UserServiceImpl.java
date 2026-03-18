@@ -7,6 +7,7 @@ import by.ares.userservice.dto.response.UserDto;
 import by.ares.userservice.exception.UserInvalidDataException;
 import by.ares.userservice.exception.UserNotFoundException;
 import by.ares.userservice.mapper.UserMapper;
+import by.ares.userservice.model.ActivationStatus;
 import by.ares.userservice.model.User;
 import by.ares.userservice.repository.UserRepository;
 import by.ares.userservice.service.abstraction.SpecificationBuilderService;
@@ -32,12 +33,12 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     private final String exceptionMessage = "User with this id not found";
+    private final ActivationStatus deletedActivationStatus = ActivationStatus.INACTIVE;
 
     @Override
     public Page<UserDto> findAll(SpecificationRequest specificationRequest, Pageable pageable) {
         return specificationRequest == null ? userRepository.findAll(pageable).map(userMapper::toDto) :
-                userRepository.findAll(specificationBuilderService.configure(specificationRequest), pageable)
-                        .map(userMapper::toDto);
+                userRepository.findAll(specificationBuilderService.configure(specificationRequest), pageable).map(userMapper::toDto);
     }
 
     @Override
@@ -60,7 +61,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @CacheEvict(value = "users", key = "'user:' + #id")
     public Long update(UserRequest userRequest, Long id) {
-        var user = userRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(exceptionMessage));
         if (!userRequest.getName().equals(user.getName()) || !userRequest.getSurname().equals(user.getSurname())) {
             for (var card : user.getPaymentCards()) {
@@ -78,7 +79,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @CacheEvict(value = "users", key = "'user:' + #id")
     public void deleteById(Long id) {
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(exceptionMessage));
+        user.setActive(deletedActivationStatus);
+        user.getPaymentCards().forEach(x -> x.setActive(deletedActivationStatus));
+        user.clear();
+        userRepository.save(user);
     }
 
     @Override
@@ -87,7 +93,8 @@ public class UserServiceImpl implements UserService {
     public Long changeStatus(Long id, ActivationStatusRequest activationStatusRequest) {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(exceptionMessage));
-        user.setActive(activationStatusRequest.getActivationStatus());
+        ActivationStatus activationStatus = activationStatusRequest.getActivationStatus();
+        user.setActive(activationStatus);
         return userRepository.save(user).getId();
     }
 
