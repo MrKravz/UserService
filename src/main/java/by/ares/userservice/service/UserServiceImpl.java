@@ -32,8 +32,8 @@ public class UserServiceImpl implements UserService {
     private final SpecificationBuilderService<User> specificationBuilderService;
     private final UserMapper userMapper;
 
-    private final String exceptionMessage = "User with this id not found";
-    private final ActivationStatus deletedActivationStatus = ActivationStatus.INACTIVE;
+    private static final String exceptionMessage = "User with this id not found";
+    private static final ActivationStatus deletedActivationStatus = ActivationStatus.INACTIVE;
 
     @Override
     public Page<UserDto> findAll(SpecificationRequest specificationRequest, Pageable pageable) {
@@ -83,7 +83,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException(exceptionMessage));
         user.setActive(deletedActivationStatus);
         user.getPaymentCards().forEach(x -> x.setActive(deletedActivationStatus));
-        user.clear();
         userRepository.save(user);
     }
 
@@ -91,7 +90,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @CacheEvict(value = "users", key = "'user:' + #id")
     public Long changeStatus(Long id, ActivationStatusRequest activationStatusRequest) {
-        var user = userRepository.findById(id)
+        var user = userRepository.findAnyById(id)
                 .orElseThrow(() -> new UserNotFoundException(exceptionMessage));
         ActivationStatus activationStatus = activationStatusRequest.getActivationStatus();
         user.setActive(activationStatus);

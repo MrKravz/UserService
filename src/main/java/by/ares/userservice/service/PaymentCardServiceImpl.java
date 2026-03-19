@@ -38,8 +38,12 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     private final PaymentCardMapper paymentCardMapper;
     private final CacheManager cacheManager;
 
-    private final String exceptionMessage = "Payment with this id not found";
-    private final ActivationStatus deletedActivationStatus = ActivationStatus.INACTIVE;
+    private static final String EXCEPTION_MESSAGE = "Payment with this id not found";
+    private static final ActivationStatus DELETED_ACTIVATION_STATUS = ActivationStatus.INACTIVE;
+    private static final String USER_CACHE_NAME = "users";
+    private static final String CARD_CACHE_NAME = "cards";
+    private static final String USER_CACHE_KEY = "user:";
+    private static final String CARD_CACHE_KEY = "card:";
 
     @Override
     public Page<PaymentCardDto> findAll(Pageable pageable) {
@@ -58,7 +62,7 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     @Cacheable(value = "cards", key = "'card:' + #id", sync = true)
     public PaymentCardDto findById(Long id) {
         return paymentCardMapper.toDto(paymentCardRepository.findById(id)
-                .orElseThrow(() -> new PaymentCardNotFoundException(exceptionMessage)));
+                .orElseThrow(() -> new PaymentCardNotFoundException(EXCEPTION_MESSAGE)));
     }
 
     @Override
@@ -77,7 +81,7 @@ public class PaymentCardServiceImpl implements PaymentCardService {
         card.setUser(owner);
         owner.addCard(card);
         card.setHolder(owner.getName().toUpperCase() + " " + owner.getSurname().toUpperCase());
-        cacheManager.getCache("users").evict("user:" + owner.getId());
+        cacheManager.getCache(USER_CACHE_NAME).evict(USER_CACHE_KEY + owner.getId());
         return paymentCardRepository.save(card).getId();
     }
 
@@ -85,11 +89,11 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     @Transactional
     public Long update(PaymentCardRequest paymentCardRequest, Long id) {
         PaymentCard paymentCard = paymentCardRepository.findById(id)
-                .orElseThrow(() -> new PaymentCardNotFoundException(exceptionMessage));
+                .orElseThrow(() -> new PaymentCardNotFoundException(EXCEPTION_MESSAGE));
         paymentCard.setNumber(paymentCardRequest.getNumber())
                 .setExpirationDate(paymentCardRequest.getExpirationDate());
-        cacheManager.getCache("cards").evict("card:" + paymentCard.getId());
-        cacheManager.getCache("users").evict("user:" + paymentCard.getUser().getId());
+        cacheManager.getCache(CARD_CACHE_NAME).evict(CARD_CACHE_KEY + paymentCard.getId());
+        cacheManager.getCache(USER_CACHE_NAME).evict(USER_CACHE_KEY + paymentCard.getUser().getId());
         return paymentCardRepository.save(paymentCard).getId();
     }
 
@@ -97,22 +101,21 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     @Transactional
     public void deleteById(Long id) {
         PaymentCard paymentCard = paymentCardRepository.findById(id)
-                .orElseThrow(() -> new PaymentCardNotFoundException(exceptionMessage));
-        paymentCard.setActive(deletedActivationStatus);
-        cacheManager.getCache("cards").evict("card:" + paymentCard.getId());
-        cacheManager.getCache("users").evict("user:" + paymentCard.getUser().getId());
-        paymentCard.getUser().removeCard(paymentCard);
+                .orElseThrow(() -> new PaymentCardNotFoundException(EXCEPTION_MESSAGE));
+        paymentCard.setActive(DELETED_ACTIVATION_STATUS);
+        cacheManager.getCache(CARD_CACHE_NAME).evict(CARD_CACHE_KEY + paymentCard.getId());
+        cacheManager.getCache(USER_CACHE_NAME).evict(USER_CACHE_KEY + paymentCard.getUser().getId());
         paymentCardRepository.save(paymentCard);
     }
 
     @Override
     @Transactional
     public Long changeStatus(Long id, ActivationStatusRequest activationStatusRequest) {
-        PaymentCard paymentCard = paymentCardRepository.findById(id)
-                .orElseThrow(() -> new PaymentCardNotFoundException(exceptionMessage));
+        PaymentCard paymentCard = paymentCardRepository.findAnyById(id)
+                .orElseThrow(() -> new PaymentCardNotFoundException(EXCEPTION_MESSAGE));
         paymentCard.setActive(activationStatusRequest.getActivationStatus());
-        cacheManager.getCache("cards").evict("card:" + paymentCard.getId());
-        cacheManager.getCache("users").evict("user:" + paymentCard.getUser().getId());
+        cacheManager.getCache(CARD_CACHE_NAME).evict(CARD_CACHE_KEY + paymentCard.getId());
+        cacheManager.getCache(USER_CACHE_NAME).evict(USER_CACHE_KEY + paymentCard.getUser().getId());
         return paymentCardRepository.save(paymentCard).getId();
     }
 
