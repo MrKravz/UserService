@@ -1,4 +1,4 @@
-package by.ares.userservice.service;
+package by.ares.userservice.service.impl;
 
 import by.ares.userservice.dto.request.ActivationStatusRequest;
 import by.ares.userservice.dto.request.PaymentCardRequest;
@@ -12,7 +12,7 @@ import by.ares.userservice.model.PaymentCard;
 import by.ares.userservice.model.User;
 import by.ares.userservice.repository.PaymentCardRepository;
 import by.ares.userservice.repository.UserRepository;
-import by.ares.userservice.service.abstraction.PaymentCardService;
+import by.ares.userservice.service.PaymentCardService;
 import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;

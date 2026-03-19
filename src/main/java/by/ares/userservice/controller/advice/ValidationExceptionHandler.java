@@ -22,7 +22,7 @@ public class ValidationExceptionHandler {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .findFirst()
                 .orElse("Validation error");
-        logger.error(errorMessage);
+        logger.error(errorMessage, ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionResponse(errorMessage, System.currentTimeMillis()));
     }
 

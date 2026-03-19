@@ -1,4 +1,4 @@
-package by.ares.userservice.service;
+package by.ares.userservice.service.impl;
 
 import by.ares.userservice.dto.request.ActivationStatusRequest;
 import by.ares.userservice.dto.request.SpecificationRequest;
@@ -10,10 +10,11 @@ import by.ares.userservice.mapper.UserMapper;
 import by.ares.userservice.model.ActivationStatus;
 import by.ares.userservice.model.User;
 import by.ares.userservice.repository.UserRepository;
-import by.ares.userservice.service.abstraction.SpecificationBuilderService;
-import by.ares.userservice.service.abstraction.UserService;
+import by.ares.userservice.service.SpecificationBuilderService;
+import by.ares.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,10 +38,13 @@ public class UserServiceImpl implements UserService {
     private static final ActivationStatus DELETED_ACTIVATION_STATUS = ActivationStatus.INACTIVE;
 
     @Override
-    public Page<UserDto> findAll(SpecificationRequest specificationRequest, Pageable pageable) {
-        return specificationRequest == null ? userRepository.findAll(pageable).map(userMapper::toDto) :
-                userRepository.findAll(specificationBuilderService.configure(specificationRequest), pageable)
-                        .map(userMapper::toDto);
+    public Page<UserDto> findAll(Optional<SpecificationRequest> specificationRequest, Pageable pageable) {
+        if (specificationRequest.isEmpty()) {
+            return userRepository.findAll(pageable).map(userMapper::toDto);
+        }
+        return userRepository
+                .findAll(specificationBuilderService.configure(specificationRequest.get()), pageable)
+                .map(userMapper::toDto);
     }
 
     @Override
@@ -60,7 +65,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "users", key = "'user:' + #id")
+    @CachePut(value = "users", key = "'user:' + #id")
     public Long update(UserRequest userRequest, Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(EXCEPTION_MESSAGE));

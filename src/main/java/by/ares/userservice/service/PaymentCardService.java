@@ -1,4 +1,4 @@
-package by.ares.userservice.service.abstraction;
+package by.ares.userservice.service;
 
 import by.ares.userservice.dto.request.PaymentCardRequest;
 import by.ares.userservice.dto.response.PaymentCardDto;

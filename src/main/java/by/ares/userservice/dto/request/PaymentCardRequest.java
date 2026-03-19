@@ -24,7 +24,7 @@ public class PaymentCardRequest {
     private LocalDate expirationDate;
 
     @NotNull(message = "User id must not be null")
-    @Positive(message = "User id must be greater than 0 minutes")
+    @Positive(message = "User id must be greater than 0")
     private Long userId;
 
 }

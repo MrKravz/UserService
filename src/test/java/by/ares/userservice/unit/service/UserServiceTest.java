@@ -6,7 +6,7 @@ import by.ares.userservice.dto.response.UserDto;
 import by.ares.userservice.mapper.UserMapper;
 import by.ares.userservice.model.User;
 import by.ares.userservice.repository.UserRepository;
-import by.ares.userservice.service.UserServiceImpl;
+import by.ares.userservice.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

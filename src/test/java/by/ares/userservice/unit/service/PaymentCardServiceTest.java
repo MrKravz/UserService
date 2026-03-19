@@ -9,7 +9,7 @@ import by.ares.userservice.model.PaymentCard;
 import by.ares.userservice.model.User;
 import by.ares.userservice.repository.PaymentCardRepository;
 import by.ares.userservice.repository.UserRepository;
-import by.ares.userservice.service.PaymentCardServiceImpl;
+import by.ares.userservice.service.impl.PaymentCardServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

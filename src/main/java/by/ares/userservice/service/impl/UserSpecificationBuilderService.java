@@ -1,8 +1,8 @@
-package by.ares.userservice.service;
+package by.ares.userservice.service.impl;
 
 import by.ares.userservice.dto.request.SpecificationRequest;
 import by.ares.userservice.model.User;
-import by.ares.userservice.service.abstraction.SpecificationBuilderService;
+import by.ares.userservice.service.SpecificationBuilderService;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 

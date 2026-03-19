@@ -15,15 +15,15 @@ public class UserExceptionHandler {
 
     @ExceptionHandler(value = UserNotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleUserNotFoundException(UserNotFoundException ex) {
-        logger.error(ex.getMessage(), System.currentTimeMillis());
+        logger.error(ex.getMessage(), ex);
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.NOT_FOUND)
                 .body(new ExceptionResponse(ex.getMessage(), System.currentTimeMillis()));
     }
 
     @ExceptionHandler(value = UserCardLimitExceededException.class)
     public ResponseEntity<ExceptionResponse> handleUserCardLimitExceededException(UserCardLimitExceededException ex) {
-        logger.error(ex.getMessage(), System.currentTimeMillis());
+        logger.error(ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ExceptionResponse(ex.getMessage(), System.currentTimeMillis()));
@@ -31,7 +31,7 @@ public class UserExceptionHandler {
 
     @ExceptionHandler(value = UserInvalidDataException.class)
     public ResponseEntity<ExceptionResponse> handleUserInvalidDataException(UserInvalidDataException ex) {
-        logger.error(ex.getMessage(), System.currentTimeMillis());
+        logger.error(ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ExceptionResponse(ex.getMessage(), System.currentTimeMillis()));

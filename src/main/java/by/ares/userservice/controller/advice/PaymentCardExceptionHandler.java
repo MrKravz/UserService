@@ -16,9 +16,9 @@ public class PaymentCardExceptionHandler {
 
     @ExceptionHandler(value = PaymentCardNotFoundException.class)
     public ResponseEntity<ExceptionResponse> handlePaymentCardNotFoundException(PaymentCardNotFoundException ex) {
-        logger.error(ex.getMessage(), System.currentTimeMillis());
+        logger.error(ex.getMessage(), ex);
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.NOT_FOUND)
                 .body(new ExceptionResponse(ex.getMessage(), System.currentTimeMillis()));
     }
 
