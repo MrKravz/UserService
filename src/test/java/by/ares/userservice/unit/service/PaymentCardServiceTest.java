@@ -111,7 +111,7 @@ class PaymentCardServiceTest {
 
     @Test
     void changeStatus_shouldUpdateStatus() {
-        when(paymentCardRepository.findById(CARD_ID)).thenReturn(Optional.of(card));
+        when(paymentCardRepository.findAnyById(CARD_ID)).thenReturn(Optional.of(card));
         when(paymentCardRepository.save(card)).thenReturn(card);
         Long result = paymentCardService.changeStatus(CARD_ID, new ActivationStatusRequest(ActivationStatus.INACTIVE));
         assertEquals(CARD_ID, result);

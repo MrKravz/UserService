@@ -21,6 +21,6 @@ public interface UserRepository extends JpaRepository<User, Long>,
     @EntityGraph(attributePaths = {"paymentCards"})
     Page<User> findAll(Pageable pageable);
 
-    @Query(value = "SELECT u FROM users u WHERE u.id = :id", nativeQuery = true)
+    @Query(value = "SELECT * FROM users WHERE id = :id", nativeQuery = true)
     Optional<User> findAnyById(Long id);
 }

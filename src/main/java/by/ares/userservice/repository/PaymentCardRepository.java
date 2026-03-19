@@ -17,6 +17,6 @@ public interface PaymentCardRepository extends JpaRepository<PaymentCard, Long> 
     @EntityGraph(attributePaths = {"user"})
     Page<PaymentCard> findAll(Pageable pageable);
 
-    @Query(value = "SELECT p FROM payment_cards p WHERE p.id = :id", nativeQuery = true)
+    @Query(value = "SELECT * FROM payment_cards WHERE id = :id", nativeQuery = true)
     Optional<PaymentCard> findAnyById(Long id);
 }

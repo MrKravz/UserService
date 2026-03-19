@@ -90,7 +90,7 @@ class UserServiceTest {
 
     @Test
     void changeStatus_shouldUpdateStatus() {
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(userRepository.findAnyById(USER_ID)).thenReturn(Optional.of(user));
         when(userRepository.save(user)).thenReturn(user);
         var result = userService.changeStatus(USER_ID, new ActivationStatusRequest(INACTIVE));
         assertEquals(USER_ID, result);

@@ -93,7 +93,9 @@ public class PaymentCardServiceImpl implements PaymentCardService {
         paymentCard.setNumber(paymentCardRequest.getNumber())
                 .setExpirationDate(paymentCardRequest.getExpirationDate());
         cacheManager.getCache(CARD_CACHE_NAME).evict(CARD_CACHE_KEY + paymentCard.getId());
-        cacheManager.getCache(USER_CACHE_NAME).evict(USER_CACHE_KEY + paymentCard.getUser().getId());
+        if (paymentCard.getUser() != null) {
+            cacheManager.getCache(USER_CACHE_NAME).evict(USER_CACHE_KEY + paymentCard.getUser().getId());
+        }
         return paymentCardRepository.save(paymentCard).getId();
     }
 
@@ -104,7 +106,9 @@ public class PaymentCardServiceImpl implements PaymentCardService {
                 .orElseThrow(() -> new PaymentCardNotFoundException(EXCEPTION_MESSAGE));
         paymentCard.setActive(DELETED_ACTIVATION_STATUS);
         cacheManager.getCache(CARD_CACHE_NAME).evict(CARD_CACHE_KEY + paymentCard.getId());
-        cacheManager.getCache(USER_CACHE_NAME).evict(USER_CACHE_KEY + paymentCard.getUser().getId());
+        if (paymentCard.getUser() != null) {
+            cacheManager.getCache(USER_CACHE_NAME).evict(USER_CACHE_KEY + paymentCard.getUser().getId());
+        }
         paymentCardRepository.save(paymentCard);
     }
 
@@ -115,7 +119,9 @@ public class PaymentCardServiceImpl implements PaymentCardService {
                 .orElseThrow(() -> new PaymentCardNotFoundException(EXCEPTION_MESSAGE));
         paymentCard.setActive(activationStatusRequest.getActivationStatus());
         cacheManager.getCache(CARD_CACHE_NAME).evict(CARD_CACHE_KEY + paymentCard.getId());
-        cacheManager.getCache(USER_CACHE_NAME).evict(USER_CACHE_KEY + paymentCard.getUser().getId());
+        if (paymentCard.getUser() != null) {
+            cacheManager.getCache(USER_CACHE_NAME).evict(USER_CACHE_KEY + paymentCard.getUser().getId());
+        }
         return paymentCardRepository.save(paymentCard).getId();
     }
 

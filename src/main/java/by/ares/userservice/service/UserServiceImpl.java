@@ -32,20 +32,21 @@ public class UserServiceImpl implements UserService {
     private final SpecificationBuilderService<User> specificationBuilderService;
     private final UserMapper userMapper;
 
-    private static final String exceptionMessage = "User with this id not found";
-    private static final ActivationStatus deletedActivationStatus = ActivationStatus.INACTIVE;
+    private static final String EXCEPTION_MESSAGE = "User with this id not found";
+    private static final ActivationStatus DELETED_ACTIVATION_STATUS = ActivationStatus.INACTIVE;
 
     @Override
     public Page<UserDto> findAll(SpecificationRequest specificationRequest, Pageable pageable) {
         return specificationRequest == null ? userRepository.findAll(pageable).map(userMapper::toDto) :
-                userRepository.findAll(specificationBuilderService.configure(specificationRequest), pageable).map(userMapper::toDto);
+                userRepository.findAll(specificationBuilderService.configure(specificationRequest), pageable)
+                        .map(userMapper::toDto);
     }
 
     @Override
     @Cacheable(value = "users", key = "'user:' + #id", sync = true)
     public UserDto findById(Long id) {
         return userMapper.toDto(userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(exceptionMessage)));
+                .orElseThrow(() -> new UserNotFoundException(EXCEPTION_MESSAGE)));
     }
 
     @Override
@@ -62,7 +63,7 @@ public class UserServiceImpl implements UserService {
     @CacheEvict(value = "users", key = "'user:' + #id")
     public Long update(UserRequest userRequest, Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(exceptionMessage));
+                .orElseThrow(() -> new UserNotFoundException(EXCEPTION_MESSAGE));
         if (!userRequest.getName().equals(user.getName()) || !userRequest.getSurname().equals(user.getSurname())) {
             for (var card : user.getPaymentCards()) {
                 card.setHolder(userRequest.getName().toUpperCase() + " " + userRequest.getSurname().toUpperCase());
@@ -80,9 +81,9 @@ public class UserServiceImpl implements UserService {
     @CacheEvict(value = "users", key = "'user:' + #id")
     public void deleteById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(exceptionMessage));
-        user.setActive(deletedActivationStatus);
-        user.getPaymentCards().forEach(x -> x.setActive(deletedActivationStatus));
+                .orElseThrow(() -> new UserNotFoundException(EXCEPTION_MESSAGE));
+        user.setActive(DELETED_ACTIVATION_STATUS);
+        user.getPaymentCards().forEach(x -> x.setActive(DELETED_ACTIVATION_STATUS));
         userRepository.save(user);
     }
 
@@ -91,7 +92,7 @@ public class UserServiceImpl implements UserService {
     @CacheEvict(value = "users", key = "'user:' + #id")
     public Long changeStatus(Long id, ActivationStatusRequest activationStatusRequest) {
         var user = userRepository.findAnyById(id)
-                .orElseThrow(() -> new UserNotFoundException(exceptionMessage));
+                .orElseThrow(() -> new UserNotFoundException(EXCEPTION_MESSAGE));
         ActivationStatus activationStatus = activationStatusRequest.getActivationStatus();
         user.setActive(activationStatus);
         return userRepository.save(user).getId();
