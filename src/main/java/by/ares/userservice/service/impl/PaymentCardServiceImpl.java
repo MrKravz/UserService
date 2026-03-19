@@ -78,7 +78,6 @@ public class PaymentCardServiceImpl implements PaymentCardService {
             throw new UserCardLimitExceededException("User can't have more than 5 cards");
         }
         PaymentCard card = paymentCardMapper.toModel(paymentCardRequest);
-        card.setUser(owner);
         owner.addCard(card);
         card.setHolder(owner.getName().toUpperCase() + " " + owner.getSurname().toUpperCase());
         cacheManager.getCache(USER_CACHE_NAME).evict(USER_CACHE_KEY + owner.getId());

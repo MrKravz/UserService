@@ -17,7 +17,7 @@ public class TestConstants {
     public static final String USER_EMAIL_4 = "Nick.FURY4@mail.com";
     public static final String USER_EMAIL_5 = "Nick.FURY5@mail.com";
     public static final String CARD_NUMBER = "1111222233334444";
-    public static final String CARD_NUMBER_2 = "8888777766665555";
+    public static final String CARD_NUMBER_2 = "1234567890123456";
     public static final String CARD_NUMBER_3 = "9999000011112222";
     public static final String CARD_HOLDER = "Nick Fury";
     public static final ActivationStatus INACTIVE = ActivationStatus.INACTIVE;

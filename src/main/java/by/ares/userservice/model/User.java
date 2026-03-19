@@ -59,7 +59,7 @@ public class User {
     @Column(name = "version")
     private Long version = 0L;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,
+    @OneToMany(mappedBy = "user",
             fetch = FetchType.LAZY)
     private Set<PaymentCard> paymentCards = new HashSet<>();
 
@@ -71,11 +71,6 @@ public class User {
     public void removeCard(PaymentCard paymentCard) {
         paymentCards.remove(paymentCard);
         paymentCard.setUser(null);
-    }
-
-    public void clear() {
-        paymentCards.forEach(x->x.setUser(null));
-        paymentCards.clear();
     }
 
 }

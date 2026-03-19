@@ -71,13 +71,13 @@ class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     void shouldChangeUserStatus() throws Exception {
-        mockMvc.perform(put("/users/change_status/{id}", user.getId())
+        mockMvc.perform(patch("/users/{id}", user.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new ActivationStatusRequest(INACTIVE))))
                 .andExpect(status().isAccepted())
                 .andExpect(content().string(String.valueOf(user.getId())));
         mockMvc.perform(get("/users/{id}", user.getId()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     @Test

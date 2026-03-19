@@ -45,7 +45,7 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     void shouldFindPaymentCardById() throws Exception {
-        mockMvc.perform(get("/payment_cards/{id}", paymentCard.getId()))
+        mockMvc.perform(get("/payment-cards/{id}", paymentCard.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(paymentCard.getId()))
                 .andExpect(jsonPath("$.holder").value(CARD_HOLDER))
@@ -55,7 +55,7 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
     @Test
     void shouldCreatePaymentCard() throws Exception {
         PaymentCardRequest request = buildPaymentCardRequest(CARD_NUMBER_2, user.getId());
-        String response = mockMvc.perform(post("/payment_cards")
+        String response = mockMvc.perform(post("/payment-cards")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -63,7 +63,7 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
                 .getResponse()
                 .getContentAsString();
         Long paymentCardId = Long.valueOf(response);
-        mockMvc.perform(get("/payment_cards/{id}", paymentCardId))
+        mockMvc.perform(get("/payment-cards/{id}", paymentCardId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(paymentCardId));
     }
@@ -72,7 +72,7 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
     void shouldUpdatePaymentCard() throws Exception {
         PaymentCardRequest request = buildPaymentCardRequest(CARD_NUMBER_3, user.getId());
         request.setExpirationDate(UPDATED_EXPIRATION_DATE);
-        String response = mockMvc.perform(put("/payment_cards/{id}", paymentCard.getId())
+        String response = mockMvc.perform(put("/payment-cards/{id}", paymentCard.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isAccepted())
@@ -81,25 +81,25 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
                 .getResponse()
                 .getContentAsString();
         Long paymentCardId = Long.valueOf(response);
-        mockMvc.perform(get("/payment_cards/{id}", paymentCardId))
+        mockMvc.perform(get("/payment-cards/{id}", paymentCardId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.number").value(CARD_NUMBER_3));
     }
 
     @Test
     void shouldChangePaymentCardStatus() throws Exception {
-        mockMvc.perform(put("/payment_cards/change_status/{id}", paymentCard.getId())
+        mockMvc.perform(patch("/payment-cards/{id}", paymentCard.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new ActivationStatusRequest(INACTIVE))))
                 .andExpect(status().isAccepted())
                 .andExpect(content().string(String.valueOf(paymentCard.getId())));
-        mockMvc.perform(get("/payment_cards/{id}", paymentCard.getId()))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/payment-cards/{id}", paymentCard.getId()))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldDeletePaymentCard() throws Exception {
-        mockMvc.perform(delete("/payment_cards/{id}", paymentCard.getId()))
+        mockMvc.perform(delete("/payment-cards/{id}", paymentCard.getId()))
                 .andExpect(status().isNoContent());
     }
 
@@ -107,7 +107,7 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
     void shouldReturnPage() throws Exception {
         savePaymentCard(user);
         savePaymentCard(user);
-        mockMvc.perform(get("/payment_cards?page=0&size=2"))
+        mockMvc.perform(get("/payment-cards?page=0&size=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2));
     }

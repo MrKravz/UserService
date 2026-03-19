@@ -20,7 +20,6 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static by.ares.userservice.util.TestConstants.*;
 import static by.ares.userservice.util.TestModelBuilder.*;
@@ -100,14 +99,7 @@ class PaymentCardServiceTest {
         verify(paymentCardRepository).save(card);
     }
 
-    @Test
-    void findAllCardsOfUser_shouldReturnCards() {
-        when(paymentCardRepository.findAllByUserId(USER_ID)).thenReturn(Set.of(card));
-        when(paymentCardMapper.toDto(card)).thenReturn(cardDto);
-        Set<PaymentCardDto> result = paymentCardService.findAllCardsOfUser(USER_ID);
-        assertEquals(1, result.size());
-        verify(paymentCardRepository).findAllByUserId(USER_ID);
-    }
+
 
     @Test
     void changeStatus_shouldUpdateStatus() {
