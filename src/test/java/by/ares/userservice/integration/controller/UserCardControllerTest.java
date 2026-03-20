@@ -22,8 +22,6 @@ class UserCardControllerTest extends AbstractIntegrationTest {
     PaymentCardRepository paymentCardRepository;
 
     private User user;
-    private
-
 
     @BeforeEach
     void init() {

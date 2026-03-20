@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class UserCardServiceImpl implements UserCardService {
         return paymentCardRepository.findAllByUserId(id)
                 .stream()
                 .map(paymentCardMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }
