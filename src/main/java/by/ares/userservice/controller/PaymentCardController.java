@@ -32,23 +32,33 @@ public class PaymentCardController {
 
     @PostMapping
     public ResponseEntity<Long> save(@Valid @RequestBody PaymentCardRequest paymentCardRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(paymentCardService.save(paymentCardRequest));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(paymentCardService.save(paymentCardRequest));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Long> update(@Valid @RequestBody PaymentCardRequest paymentCardRequest, @PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(paymentCardService.update(paymentCardRequest, id));
+    public ResponseEntity<Long> update(@Valid @RequestBody PaymentCardRequest paymentCardRequest,
+                                       @PathVariable Long id) {
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(paymentCardService.update(paymentCardRequest, id));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Long> changeStatus(@Valid @RequestBody ActivationStatusRequest activationStatusRequest, @PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(paymentCardService.changeStatus(id, activationStatusRequest));
+    public ResponseEntity<Long> changeStatus(@Valid @RequestBody ActivationStatusRequest activationStatusRequest,
+                                             @PathVariable Long id) {
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(paymentCardService.changeStatus(id, activationStatusRequest));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         paymentCardService.deleteById(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
     }
 
 }

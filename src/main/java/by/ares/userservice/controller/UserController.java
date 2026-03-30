@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -29,6 +30,11 @@ public class UserController {
         return ResponseEntity.ok(userService.findAll(Optional.of(specificationRequest), pageable));
     }
 
+    @GetMapping("/find-all")
+    public ResponseEntity<List<UserDto>> findAllById(@RequestParam List<Long> usersId) {
+        return ResponseEntity.ok(userService.findAllById(usersId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> findById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.findById(id));
@@ -36,23 +42,33 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<Long> save(@Valid @RequestBody UserRequest userRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(userRequest));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(userService.save(userRequest));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Long> update(@Valid @RequestBody UserRequest userRequest, @PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(userService.update(userRequest, id));
+    public ResponseEntity<Long> update(@Valid @RequestBody UserRequest userRequest,
+                                       @PathVariable Long id) {
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(userService.update(userRequest, id));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Long> changeStatus(@Valid @RequestBody ActivationStatusRequest activationStatusRequest, @PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(userService.changeStatus(id, activationStatusRequest));
+    public ResponseEntity<Long> changeStatus(@Valid @RequestBody ActivationStatusRequest activationStatusRequest,
+                                             @PathVariable Long id) {
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(userService.changeStatus(id, activationStatusRequest));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         userService.deleteById(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
     }
 
 }

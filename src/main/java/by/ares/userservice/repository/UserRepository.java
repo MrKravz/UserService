@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,6 +18,10 @@ public interface UserRepository extends JpaRepository<User, Long>,
         JpaSpecificationExecutor<User> {
     @EntityGraph(attributePaths = {"paymentCards"})
     Page<User> findAll(Specification<User> spec, Pageable pageable);
+
+    @Override
+    @EntityGraph(attributePaths = {"paymentCards"})
+    List<User> findAllById(Iterable<Long> ids);
 
     @EntityGraph(attributePaths = {"paymentCards"})
     Page<User> findAll(Pageable pageable);
