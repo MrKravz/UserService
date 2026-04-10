@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,16 +22,19 @@ public class PaymentCardController {
     private final PaymentCardService paymentCardService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<PaymentCardDto>> findAll(@PageableDefault Pageable pageable) {
         return ResponseEntity.ok(paymentCardService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<PaymentCardDto> findById(@PathVariable Long id) {
         return ResponseEntity.ok(paymentCardService.findById(id));
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Long> save(@Valid @RequestBody PaymentCardRequest paymentCardRequest) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -38,6 +42,7 @@ public class PaymentCardController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Long> update(@Valid @RequestBody PaymentCardRequest paymentCardRequest,
                                        @PathVariable Long id) {
         return ResponseEntity
@@ -46,6 +51,7 @@ public class PaymentCardController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> changeStatus(@Valid @RequestBody ActivationStatusRequest activationStatusRequest,
                                              @PathVariable Long id) {
         return ResponseEntity
@@ -54,6 +60,7 @@ public class PaymentCardController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         paymentCardService.deleteById(id);
         return ResponseEntity

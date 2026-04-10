@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,17 +26,20 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserDto>> findAll(@ModelAttribute SpecificationRequest specificationRequest,
                                                  @PageableDefault Pageable pageable) {
         return ResponseEntity.ok(userService.findAll(Optional.of(specificationRequest), pageable));
     }
 
     @GetMapping("/find-all")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserDto>> findAllById(@RequestParam List<Long> usersId) {
         return ResponseEntity.ok(userService.findAllById(usersId));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<UserDto> findById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.findById(id));
     }
@@ -48,6 +52,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Long> update(@Valid @RequestBody UserRequest userRequest,
                                        @PathVariable Long id) {
         return ResponseEntity
@@ -56,6 +61,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> changeStatus(@Valid @RequestBody ActivationStatusRequest activationStatusRequest,
                                              @PathVariable Long id) {
         return ResponseEntity
@@ -64,6 +70,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         userService.deleteById(id);
         return ResponseEntity
