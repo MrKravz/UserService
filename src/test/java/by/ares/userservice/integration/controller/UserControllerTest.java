@@ -5,10 +5,12 @@ import by.ares.userservice.dto.request.UserRequest;
 import by.ares.userservice.integration.controller.abstraction.AbstractIntegrationTest;
 import by.ares.userservice.model.User;
 import by.ares.userservice.repository.UserRepository;
+import by.ares.userservice.service.SecurityValidationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static by.ares.userservice.util.TestConstants.*;
 import static by.ares.userservice.util.TestModelBuilder.buildUser;
@@ -20,6 +22,9 @@ class UserControllerTest extends AbstractIntegrationTest {
 
     @Autowired
     UserRepository userRepository;
+
+    @MockitoBean
+    private SecurityValidationService securityValidationService;
 
     private User user;
 
@@ -36,7 +41,9 @@ class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     void shouldFindUserById() throws Exception {
-        mockMvc.perform(get("/users/{id}", user.getId()))
+        mockMvc.perform(get("/users/{id}", user.getId())
+                        .header("X-User-Id", user.getId())
+                        .header("X-User-Role", "ADMIN"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId()))
                 .andExpect(jsonPath("$.name").value(USER_NAME));
@@ -47,13 +54,17 @@ class UserControllerTest extends AbstractIntegrationTest {
         UserRequest request = buildUserRequest(USER_EMAIL_2);
         String response = mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", user.getId())
+                        .header("X-User-Role", "ADMIN"))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
         Long userId = Long.valueOf(response);
-        mockMvc.perform(get("/users/{id}", userId))
+        mockMvc.perform(get("/users/{id}", userId)
+                        .header("X-User-Id", user.getId())
+                        .header("X-User-Role", "ADMIN"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId));
     }
@@ -63,6 +74,8 @@ class UserControllerTest extends AbstractIntegrationTest {
         UserRequest request = buildUserRequest(USER_EMAIL_3);
         request.setSurname(UPDATED_USER_SURNAME);
         mockMvc.perform(put("/users/{id}", user.getId())
+                        .header("X-User-Id", user.getId())
+                        .header("X-User-Role", "ADMIN")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isAccepted())
@@ -73,10 +86,14 @@ class UserControllerTest extends AbstractIntegrationTest {
     void shouldChangeUserStatus() throws Exception {
         mockMvc.perform(patch("/users/{id}", user.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ActivationStatusRequest(INACTIVE))))
+                        .content(objectMapper.writeValueAsString(new ActivationStatusRequest(INACTIVE)))
+                        .header("X-User-Id", user.getId())
+                        .header("X-User-Role", "ADMIN"))
                 .andExpect(status().isAccepted())
                 .andExpect(content().string(String.valueOf(user.getId())));
-        mockMvc.perform(get("/users/{id}", user.getId()))
+        mockMvc.perform(get("/users/{id}", user.getId())
+                        .header("X-User-Id", user.getId())
+                        .header("X-User-Role", "ADMIN"))
                 .andExpect(status().isNotFound());
     }
 
