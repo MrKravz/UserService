@@ -25,9 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
@@ -48,14 +45,6 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     @Override
     public Page<PaymentCardDto> findAll(Pageable pageable) {
         return paymentCardRepository.findAll(pageable).map(paymentCardMapper::toDto);
-    }
-
-    @Override
-    public Set<PaymentCardDto> findAllCardsOfUser(Long userId) {
-        return paymentCardRepository.findAllByUserId(userId)
-                .stream()
-                .map(paymentCardMapper::toDto)
-                .collect(Collectors.toSet());
     }
 
     @Override

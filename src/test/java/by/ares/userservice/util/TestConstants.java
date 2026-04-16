@@ -20,6 +20,9 @@ public class TestConstants {
     public static final String CARD_NUMBER_2 = "1234567890123456";
     public static final String CARD_NUMBER_3 = "9999000011112222";
     public static final String CARD_HOLDER = "Nick Fury";
+    public static final String ADMIN = "ADMIN";
+    public static final String USER = "USER";
+    public static final String INTERNAL_KEY = "INTERNAL_KEY";
     public static final ActivationStatus INACTIVE = ActivationStatus.INACTIVE;
     public static final LocalDate BIRTH_DATE = LocalDate.of(1990, 1, 1);
     public static final LocalDate EXPIRATION_DATE = LocalDate.of(2030, 1, 1);

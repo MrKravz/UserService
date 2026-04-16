@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -45,6 +46,14 @@ public class UserServiceImpl implements UserService {
         return userRepository
                 .findAll(specificationBuilderService.configure(specificationRequest.get()), pageable)
                 .map(userMapper::toDto);
+    }
+
+    @Override
+    public List<UserDto> findAllById(List<Long> usersId) {
+        return userRepository.findAllById(usersId)
+                .stream()
+                .map(userMapper::toDto)
+                .toList();
     }
 
     @Override
