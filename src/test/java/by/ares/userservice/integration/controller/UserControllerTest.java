@@ -99,7 +99,8 @@ class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteUser() throws Exception {
-        mockMvc.perform(delete("/users/{id}", user.getId()))
+        mockMvc.perform(delete("/users/{id}", user.getId())
+                .header("X-User-Role", "ADMIN"))
                 .andExpect(status().isNoContent());
     }
 

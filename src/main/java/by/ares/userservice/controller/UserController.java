@@ -76,7 +76,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id,
+                                       @RequestHeader("X-User-Role") String role) {
+        securityValidationService.validateAccess(role);
         userService.deleteById(id);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)

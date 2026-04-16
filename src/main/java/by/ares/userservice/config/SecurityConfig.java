@@ -35,7 +35,8 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST,"/users/**").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/users/**", "/payment_cards/**")
+                        .requestMatchers(HttpMethod.DELETE,"/users/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE,"/payment_cards/**")
                         .hasRole(Role.ADMIN.toString())
                         .requestMatchers(HttpMethod.PATCH,"/users/**", "/payment_cards/**")
                         .hasRole(Role.ADMIN.toString())
