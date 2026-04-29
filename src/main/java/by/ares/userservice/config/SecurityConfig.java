@@ -34,6 +34,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) {
         return http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/users/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/users/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/payment_cards/**")
