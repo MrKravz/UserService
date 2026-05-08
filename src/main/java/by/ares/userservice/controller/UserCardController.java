@@ -1,13 +1,11 @@
 package by.ares.userservice.controller;
 
 import by.ares.userservice.dto.response.PaymentCardDto;
+import by.ares.userservice.service.SecurityValidationService;
 import by.ares.userservice.service.UserCardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,10 +15,14 @@ import java.util.List;
 public class UserCardController {
 
     private final UserCardService userCardService;
+    private final SecurityValidationService securityValidationService;
 
     @GetMapping
-    public ResponseEntity<List<PaymentCardDto>> findAll(@PathVariable Long userId) {
-        return ResponseEntity.ok(userCardService.findAllByUserId(userId));
+    public ResponseEntity<List<PaymentCardDto>> findAll(@PathVariable(name = "userId") Long id,
+                                                        @RequestHeader("X-User-Id") Long userId,
+                                                        @RequestHeader("X-User-Role") String role) {
+        securityValidationService.validateAccess(id, userId, role);
+        return ResponseEntity.ok(userCardService.findAllByUserId(id));
     }
 
 }

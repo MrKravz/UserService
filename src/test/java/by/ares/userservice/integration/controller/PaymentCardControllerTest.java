@@ -7,10 +7,12 @@ import by.ares.userservice.model.PaymentCard;
 import by.ares.userservice.model.User;
 import by.ares.userservice.repository.PaymentCardRepository;
 import by.ares.userservice.repository.UserRepository;
+import by.ares.userservice.service.SecurityValidationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static by.ares.userservice.util.TestConstants.*;
 import static by.ares.userservice.util.TestModelBuilder.*;
@@ -19,6 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class PaymentCardControllerTest extends AbstractIntegrationTest {
 
+    @MockitoBean
+    private SecurityValidationService securityValidationService;
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -56,6 +60,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
     void shouldCreatePaymentCard() throws Exception {
         PaymentCardRequest request = buildPaymentCardRequest(CARD_NUMBER_2, user.getId());
         String response = mockMvc.perform(post("/payment-cards")
+                        .header("X-User-Id", user.getId())
+                        .header("X-User-Role", "ADMIN")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -73,6 +79,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
         PaymentCardRequest request = buildPaymentCardRequest(CARD_NUMBER_3, user.getId());
         request.setExpirationDate(UPDATED_EXPIRATION_DATE);
         String response = mockMvc.perform(put("/payment-cards/{id}", paymentCard.getId())
+                        .header("X-User-Id", user.getId())
+                        .header("X-User-Role", "ADMIN")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isAccepted())
